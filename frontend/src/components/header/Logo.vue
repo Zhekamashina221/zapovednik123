@@ -1,7 +1,7 @@
 <template>
   <router-link class="logo" to="/">
     <img alt="" class="logo__img" src="../../assets/tree.png" />
-    <span class="logo-text">Zapovednik</span>
+    <span class="logo-text">Zapovednikqwd</span>
   </router-link>
 </template>
 
