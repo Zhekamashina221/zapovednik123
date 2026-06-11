@@ -1,2 +1,0 @@
-{"ts":"2026-05-25T03:04:43.451Z","level":"INFO","message":"mirror-photos started","dryRun":false,"limit":5,"concurrency":4,"delayMs":150,"timeoutMs":30000}
-{"ts":"2026-05-25T03:04:43.461Z","level":"INFO","message":"Бэкап БД создан","backupPath":"D:\\Zapovednik\\backend\\reserves.db.backup.2026-05-25T03-04-43-458Z"}
