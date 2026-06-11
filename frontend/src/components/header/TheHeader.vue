@@ -1,12 +1,25 @@
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted, watch, nextTick } from 'vue'
+import { useRoute } from 'vue-router'
 import Navbar from '@/components/header/Navbar.vue'
 import Logo from '@/components/header/Logo.vue'
 import HeaderSearch from '@/components/header/HeaderSearch.vue'
 import { useScrollLock } from '@/composables/useScrollLock'
 
+const route = useRoute()
+
 const mobileMenuOpen = ref(false)
+const menuToggleRef = ref(null)
+const mobileMenuRef = ref(null)
 const { lock, unlock, forceUnlock } = useScrollLock()
+
+/** Фокус не должен оставаться внутри панели при aria-hidden (a11y). */
+const releaseMenuFocus = () => {
+  const active = document.activeElement
+  if (!(active instanceof HTMLElement) || !mobileMenuRef.value?.contains(active)) return
+  active.blur()
+  menuToggleRef.value?.focus()
+}
 
 const onResize = () => {
   if (window.innerWidth >= 992) closeMenu()
@@ -17,15 +30,31 @@ const onEscape = (e) => {
 }
 
 const toggleMenu = () => {
-  mobileMenuOpen.value = !mobileMenuOpen.value
-  if (mobileMenuOpen.value) lock()
-  else unlock()
+  const willOpen = !mobileMenuOpen.value
+  mobileMenuOpen.value = willOpen
+  if (willOpen) {
+    lock()
+    nextTick(() => {
+      mobileMenuRef.value?.querySelector('input')?.focus()
+    })
+  } else {
+    releaseMenuFocus()
+    unlock()
+  }
 }
 
 const closeMenu = () => {
+  releaseMenuFocus()
   mobileMenuOpen.value = false
   unlock()
 }
+
+watch(
+  () => route.fullPath,
+  () => {
+    if (mobileMenuOpen.value) closeMenu()
+  },
+)
 
 onMounted(() => {
   window.addEventListener('resize', onResize)
@@ -44,7 +73,7 @@ onUnmounted(() => {
       <Logo />
 
       <div class="header__search-desktop">
-        <HeaderSearch />
+        <HeaderSearch @navigate="closeMenu" />
       </div>
 
       <nav class="navbar-desktop">
@@ -52,6 +81,7 @@ onUnmounted(() => {
       </nav>
 
       <button
+        ref="menuToggleRef"
         :aria-expanded="mobileMenuOpen ? 'true' : 'false'"
         :aria-label="mobileMenuOpen ? 'Закрыть меню' : 'Открыть меню'"
         aria-controls="mobile-menu-panel"
@@ -67,7 +97,9 @@ onUnmounted(() => {
 
       <div
         id="mobile-menu-panel"
+        ref="mobileMenuRef"
         :aria-hidden="mobileMenuOpen ? 'false' : 'true'"
+        :inert="!mobileMenuOpen"
         :class="{ open: mobileMenuOpen }"
         aria-label="Меню навигации"
         aria-modal="true"
@@ -75,7 +107,7 @@ onUnmounted(() => {
         role="dialog"
       >
         <div class="mobile-menu__inner">
-          <HeaderSearch />
+          <HeaderSearch @navigate="closeMenu" />
           <Navbar @click="closeMenu" />
         </div>
       </div>

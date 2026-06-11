@@ -166,6 +166,8 @@ import { useRouter } from 'vue-router'
 import { useReservesStore } from '@/stores/reserves'
 import api from '@/services/api'
 
+const emit = defineEmits(['navigate'])
+
 const router = useRouter()
 const store = useReservesStore()
 
@@ -246,6 +248,7 @@ const onOutsideClick = (event) => {
 
 const goToReserve = async (id) => {
   closeDropdown()
+  emit('navigate')
   await router.push(`/reserve/${id}`)
 }
 
@@ -255,6 +258,7 @@ const goToList = async () => {
     search: query.value,
   })
   closeDropdown()
+  emit('navigate')
   await router.push('/list')
 }
 

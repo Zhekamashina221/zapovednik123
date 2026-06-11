@@ -23,7 +23,7 @@
           >
         </button>
 
-        <div class="filter-panel-list__chips">
+        <div class="filter-panel__chips">
           <FilterFields
             :districts="districts"
             :filters="store.filters"
@@ -86,21 +86,6 @@
       />
     </div>
 
-    <div
-      v-if="isMobile && activeFiltersCount"
-      class="filter-panel-list__chips filter-panel-list__chips--page"
-    >
-      <FilterFields
-        :districts="districts"
-        :filters="store.filters"
-        :region-district-pairs="regionDistrictPairs"
-        :regions="regions"
-        :types="types"
-        chips-only
-        @update:filters="store.setFilters"
-      />
-    </div>
-
     <Teleport to="body">
       <div v-if="isMobile && mobileOpen" class="mobile-filters-overlay" @click.self="closeMobile">
         <div class="mobile-filters-content card-surface" @click.stop>
@@ -119,10 +104,7 @@
             </button>
           </div>
 
-          <div
-            v-if="activeFiltersCount"
-            class="filter-panel-list__chips filter-panel-list__chips--sheet"
-          >
+          <div v-if="activeFiltersCount" class="filter-panel__chips filter-panel__chips--sheet">
             <FilterFields
               :districts="districts"
               :filters="store.filters"
@@ -271,7 +253,19 @@
             </button>
           </div>
 
-          <div class="filter-panel__scroll">
+          <div v-if="activeFiltersCount" class="filter-panel__chips filter-panel__chips--sheet">
+            <FilterFields
+              :districts="districts"
+              :filters="store.filters"
+              :region-district-pairs="regionDistrictPairs"
+              :regions="regions"
+              :types="types"
+              chips-only
+              @update:filters="store.setFilters"
+            />
+          </div>
+
+          <div class="filter-panel__scroll filter-panel__scroll--sheet">
             <FilterFields
               :districts="districts"
               :filters="store.filters"
@@ -279,11 +273,12 @@
               :region-district-pairs="regionDistrictPairs"
               :regions="regions"
               :types="types"
+              hide-chips
               @update:filters="store.setFilters"
             />
           </div>
 
-          <footer class="filter-panel__footer">
+          <footer class="filter-panel__footer filter-panel__footer--sheet">
             <button
               class="filter-panel__apply app-btn app-btn--primary"
               type="button"
@@ -709,38 +704,30 @@ const onApply = async () => {
   gap: 10px 12px;
 }
 
-.filter-panel-list__chips {
+.filter-panel__chips {
   flex: 1 1 160px;
   min-width: 0;
 
-  &--page {
-    margin: 0;
-  }
-
   &--sheet {
+    flex: none;
     flex-shrink: 0;
-    padding: 0 16px 4px;
-    max-height: 108px;
+    width: 100%;
+    padding: 0 16px 8px;
+    border-bottom: 1px solid #eef0f2;
+    max-height: 120px;
     overflow-y: auto;
     overscroll-behavior: contain;
+    box-sizing: border-box;
   }
 }
 
-.filter-panel-list__chips--page :deep(.type-chips),
-.filter-panel-list__chips--sheet :deep(.type-chips) {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px;
-  margin: 0;
-}
-
-.filter-panel--list .filter-panel-list__chips :deep(.filter-fields--chips-only) {
+.filter-panel__chips--sheet :deep(.filter-fields--chips-only) {
   display: block;
   width: 100%;
 }
 
-.filter-panel--list .filter-panel-list__chips :deep(.type-chips) {
+.filter-panel__chips :deep(.type-chips),
+.filter-panel__chips--sheet :deep(.type-chips) {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
