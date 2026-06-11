@@ -24,6 +24,12 @@ uploads.zip
 # Local backups (large DB dumps)
 backup/
 
+# SSL certificates
+ssl/
+
+# Deploy webhook (contains deploy token)
+deploy_webhook.py
+
 # OS / IDE
 .DS_Store
 Thumbs.db
