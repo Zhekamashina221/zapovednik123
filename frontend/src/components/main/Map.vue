@@ -72,6 +72,7 @@ let nearbyUserMarker = null
 let userRadiusCircle = null
 /** Маркер после нажатия «моё местоположение», когда режим «рядом» выключен */
 let browseUserMarker = null
+let syncMapSize = null
 const iconCache = new Map()
 
 
@@ -192,6 +193,14 @@ onMounted(async () => {
   // immediate watcher on nearby props runs before map exists — draw overlay once map is ready
   updateUserOverlay()
   document.addEventListener('click', onDocumentClick, true)
+
+  syncMapSize = () => {
+    if (!map) return
+    map.invalidateSize({ animate: false })
+  }
+  window.visualViewport?.addEventListener('resize', syncMapSize)
+  window.visualViewport?.addEventListener('scroll', syncMapSize)
+  window.addEventListener('orientationchange', syncMapSize)
 })
 
 const updateMarkers = (reserves) => {
@@ -349,6 +358,12 @@ watch(
 )
 
 onBeforeUnmount(() => {
+  if (syncMapSize) {
+    window.visualViewport?.removeEventListener('resize', syncMapSize)
+    window.visualViewport?.removeEventListener('scroll', syncMapSize)
+    window.removeEventListener('orientationchange', syncMapSize)
+    syncMapSize = null
+  }
   document.removeEventListener('click', onDocumentClick, true)
   if (timer) {
     clearTimeout(timer)
@@ -587,8 +602,8 @@ onBeforeUnmount(() => {
   }
 
   .map-ctrl-stack--locate {
-    bottom: 14px;
-    right: 8px;
+    bottom: calc(14px + env(safe-area-inset-bottom, 0px));
+    right: max(8px, env(safe-area-inset-right, 0px));
   }
 }
 </style>

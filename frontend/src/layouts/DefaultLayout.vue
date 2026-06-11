@@ -1,6 +1,9 @@
 <script setup>
 import TheHeader from '@/components/header/TheHeader.vue'
 import AppToast from '@/components/common/AppToast.vue'
+import { useVisualViewportHeight } from '@/composables/useVisualViewportHeight'
+
+useVisualViewportHeight()
 </script>
 
 <template>
@@ -13,6 +16,6 @@ import AppToast from '@/components/common/AppToast.vue'
 
 <style scoped lang="scss">
 .main-content {
-  min-height: calc(100vh - $header-height);
+  min-height: calc(var(--viewport-height) - var(--header-height));
 }
 </style>

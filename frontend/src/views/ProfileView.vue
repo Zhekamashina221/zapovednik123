@@ -8,16 +8,10 @@
     />
 
     <section class="profile-content">
-      <div
-        v-if="auth.user && !auth.user.email_verified"
-        class="profile-verify-banner"
-        role="alert"
-      >
+      <div v-if="auth.user && !auth.user.email_verified" class="profile-verify-banner" role="alert">
         <p>
           Email не подтверждён. Избранное, отзывы и маршруты недоступны до подтверждения.
-          <router-link
-            :to="{ path: '/verify-email-sent', query: { email: auth.user.email } }"
-          >
+          <router-link :to="{ path: '/verify-email-sent', query: { email: auth.user.email } }">
             Отправить письмо повторно
           </router-link>
         </p>
@@ -451,8 +445,6 @@ onMounted(async () => {
   }
 
   :deep(.profile-sidebar__nav) {
-    flex-direction: row;
-    flex-wrap: nowrap;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;

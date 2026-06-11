@@ -17,17 +17,13 @@
         <i aria-hidden="true" class="bi bi-person-fill"></i>
         <span class="nav-link__label">Профиль</span>
       </router-link>
-      <router-link
-        v-if="auth.user.role === 'admin'"
-        class="nav-link"
-        title="Админка"
-        to="/admin"
-      >
+      <router-link v-if="auth.user.role === 'admin'" class="nav-link" title="Админка" to="/admin">
         <i aria-hidden="true" class="bi bi-gear-fill"></i>
         <span class="nav-link__label">Админка</span>
       </router-link>
     </template>
     <router-link v-else class="nav-link" title="Войти" to="/login">
+      <i aria-hidden="true" class="bi bi-person-fill"></i>
       <span class="nav-link__label">Войти</span>
     </router-link>
   </nav>

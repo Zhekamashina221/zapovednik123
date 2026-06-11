@@ -13,7 +13,10 @@
         {{ tab.label }}
       </button>
     </nav>
-    <button class="app-btn app-btn--danger profile-sidebar__logout" @click="$emit('logout')">Выйти</button>
+    <button class="app-btn app-btn--danger profile-sidebar__logout" @click="$emit('logout')">
+      <i class="bi bi-box-arrow-right"></i>
+      Выйти
+    </button>
   </aside>
 </template>
 

@@ -1,5 +1,16 @@
 @use 'variables' as *;
 
+:root {
+  --header-height: #{$header-height};
+  --viewport-height: 100vh;
+}
+
+@supports (height: 100dvh) {
+  :root {
+    --viewport-height: 100dvh;
+  }
+}
+
 * {
   box-sizing: border-box;
 }

@@ -85,13 +85,16 @@ function goToReserve(id) {
 <style lang="scss" scoped>
 .home-layout {
   position: relative;
-  height: calc(100vh - $header-height);
+  height: calc(var(--viewport-height) - var(--header-height));
+  max-height: calc(var(--viewport-height) - var(--header-height));
+  overflow: hidden;
 }
 
 .map-section {
   position: absolute;
   inset: 0;
   background: #e8eaed;
+  overflow: hidden;
 }
 
 .loading-overlay {
