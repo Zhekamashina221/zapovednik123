@@ -169,11 +169,13 @@ router.get('/', optionalAuth, (req, res) => {
         SELECT COUNT(*)
         FROM reviews rv
         WHERE rv.reserve_id = reserves.id
+          AND rv.status = 'approved'
       ) AS reviews_count,
       (
         SELECT ROUND(AVG(rv.rating), 1)
         FROM reviews rv
         WHERE rv.reserve_id = reserves.id
+          AND rv.status = 'approved'
       ) AS avg_rating
     FROM reserves
     ${whereClause}
@@ -235,11 +237,13 @@ router.get('/:id', optionalAuth, (req, res) => {
             SELECT COUNT(*)
             FROM reviews rv
             WHERE rv.reserve_id = reserves.id
+              AND rv.status = 'approved'
           ) AS reviews_count,
           (
             SELECT ROUND(AVG(rv.rating), 1)
             FROM reviews rv
             WHERE rv.reserve_id = reserves.id
+              AND rv.status = 'approved'
           ) AS avg_rating
          FROM reserves
          WHERE reserves.id = ?`

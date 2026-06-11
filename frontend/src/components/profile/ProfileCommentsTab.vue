@@ -1,9 +1,9 @@
 <template>
   <section class="profile-panel">
-    <h1 class="profile-panel__title">Комментарии</h1>
+    <h1 class="profile-panel__title">Отзывы</h1>
     <p v-if="commentsError" class="profile-error">{{ commentsError }}</p>
-    <p v-if="loadingComments" class="profile-muted">Загружаем комментарии...</p>
-    <p v-else-if="!comments.length" class="profile-muted">Вы еще не оставляли комментарии.</p>
+    <p v-if="loadingComments" class="profile-muted">Загружаем отзывы...</p>
+    <p v-else-if="!comments.length" class="profile-muted">Вы ещё не оставляли отзывы.</p>
 
     <ul v-else class="comments-list">
       <li v-for="comment in comments" :key="comment.id" class="comment-card">
@@ -15,7 +15,12 @@
         </div>
         <p class="comment-card__text">{{ comment.comment }}</p>
         <div class="comment-card__footer">
-          <small>{{ formatDate(comment.created_at) }}</small>
+          <div class="comment-card__meta">
+            <small>{{ formatDate(comment.created_at) }}</small>
+            <span v-if="comment.status" :class="['comment-card__status', `comment-card__status--${comment.status}`]">
+              {{ reviewStatusLabel(comment.status) }}
+            </span>
+          </div>
           <button
             :disabled="deletingCommentId === comment.id"
             class="app-btn app-btn--danger"
@@ -40,4 +45,15 @@ defineProps({
 })
 
 defineEmits(['delete-comment'])
+
+const reviewStatusLabels = {
+  pending: 'На модерации',
+  approved: 'Опубликован',
+  hidden: 'Скрыт',
+  rejected: 'Отклонён',
+}
+
+function reviewStatusLabel(status) {
+  return reviewStatusLabels[String(status || '').toLowerCase()] || status
+}
 </script>

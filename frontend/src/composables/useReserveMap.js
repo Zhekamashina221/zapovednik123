@@ -74,6 +74,7 @@ export function useReserveMap() {
   const pickupHint = ref('')
   const viaPoints = ref([])
   const startPoint = ref(null)
+  const buildStartSource = ref('geo')
   const routeProfile = ref('driving-car')
   /** Последний успешно построенный маршрут (для сохранения в профиль). */
   const lastRouteGeojson = ref(null)
@@ -117,6 +118,7 @@ export function useReserveMap() {
     routeSummary.value = null
     routeSteps.value = []
     startPoint.value = null
+    buildStartSource.value = 'geo'
     viaPoints.value = []
     lastRouteGeojson.value = null
     lastRouteDistanceM.value = null
@@ -330,6 +332,7 @@ export function useReserveMap() {
         lng: reserve.longitude,
       })
       routeActive.value = true
+      routeMenuOpen.value = true
       lastRouteGeojson.value = data.data.geojson
       const rawDist = Number(data.data.distance)
       const rawDur = Number(data.data.duration)
@@ -345,6 +348,7 @@ export function useReserveMap() {
   function requestRouteFromModal(reserve, { startSource, profile }, notify) {
     notifyUser = typeof notify === 'function' ? notify : () => {}
     currentReserve.value = reserve
+    buildStartSource.value = startSource === 'map' ? 'map' : 'geo'
     routeProfile.value = profile === 'foot-walking' ? 'foot-walking' : 'driving-car'
 
     if (routeLayerGroup && map.value) {
@@ -377,6 +381,7 @@ export function useReserveMap() {
         { timeout: 15000, enableHighAccuracy: true },
       )
     } else {
+      routeMenuOpen.value = false
       pickupRouteState.value = 'picking_start'
       pickupHint.value = 'Кликните на карте начальную точку маршрута.'
       notifyUser('Выберите точку отправления на карте.')
@@ -385,6 +390,7 @@ export function useReserveMap() {
 
   function startPickingVia() {
     if (!map.value || !routeActive.value || !canAddVia.value) return
+    routeMenuOpen.value = false
     pickupRouteState.value = 'picking_via'
     pickupHint.value =
       'Кликните на карте промежуточную точку. Маршрут до объекта будет пересчитан.'
@@ -402,6 +408,7 @@ export function useReserveMap() {
     routeSummary.value = null
     routeSteps.value = []
     startPoint.value = null
+    buildStartSource.value = 'geo'
     viaPoints.value = []
     lastRouteGeojson.value = null
     lastRouteDistanceM.value = null
@@ -486,6 +493,8 @@ export function useReserveMap() {
     routeSummary,
     routeSteps,
     pickupHint,
+    startPoint,
+    buildStartSource,
     canAddVia,
     routeProfile,
     lastRouteGeojson,

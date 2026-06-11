@@ -3,6 +3,7 @@ import api from '@/services/api'
 
 export function useReserveReviews(id) {
   const reviews = ref([])
+  const userReview = ref(null)
   const reviewsLoading = ref(false)
   const reviewsError = ref('')
   const reviewSubmitting = ref(false)
@@ -17,12 +18,29 @@ export function useReserveReviews(id) {
     return reviewForm.value.rating >= 1 && reviewForm.value.rating <= 5 && length >= 10 && length <= 2000
   })
 
-  async function loadReviews() {
+  async function loadUserReview() {
+    const rid = toValue(id)
+    try {
+      const { data } = await api.getMyReviews()
+      userReview.value =
+        (data.data || []).find((review) => String(review.reserve_id) === String(rid)) || null
+    } catch {
+      userReview.value = null
+    }
+  }
+
+  async function loadReviews(isLoggedIn = false) {
     const rid = toValue(id)
     reviewsLoading.value = true
     reviewsError.value = ''
     try {
-      const { data } = await api.getReserveReviews(rid)
+      const requests = [api.getReserveReviews(rid)]
+      if (isLoggedIn) {
+        requests.push(loadUserReview())
+      } else {
+        userReview.value = null
+      }
+      const [{ data }] = await Promise.all(requests)
       reviews.value = data.data || []
     } catch (err) {
       reviewsError.value = 'Не удалось загрузить отзывы'
@@ -46,14 +64,15 @@ export function useReserveReviews(id) {
     reviewSubmitError.value = ''
     try {
       const rid = toValue(id)
-      await api.createReserveReview(rid, {
+      const { data } = await api.createReserveReview(rid, {
         rating: reviewForm.value.rating,
         comment: reviewForm.value.comment.trim(),
       })
       reviewForm.value.comment = ''
       reviewForm.value.rating = 5
-      await loadReviews()
-      return { ok: true, message: 'Отзыв успешно отправлен' }
+      userReview.value = data.data || null
+      await loadReviews(true)
+      return { ok: true, message: 'Отзыв отправлен на модерацию' }
     } catch (err) {
       reviewSubmitError.value = err?.response?.data?.error || 'Не удалось отправить отзыв'
       return { ok: false, message: reviewSubmitError.value }
@@ -64,6 +83,7 @@ export function useReserveReviews(id) {
 
   return {
     reviews,
+    userReview,
     reviewsLoading,
     reviewsError,
     reviewSubmitting,

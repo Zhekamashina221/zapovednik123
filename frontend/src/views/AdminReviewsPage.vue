@@ -37,7 +37,7 @@
               <th>Пользователь</th>
               <th>Рейтинг</th>
               <th>Статус</th>
-              <th>Комментарий</th>
+              <th>Отзыв</th>
               <th>Создан</th>
               <th>Модерация</th>
             </tr>
@@ -54,7 +54,9 @@
               </td>
               <td>{{ item.rating }}</td>
               <td>
-                <span class="status-badge" :class="`status-${item.status}`">{{ reviewStatusLabel(item.status) }}</span>
+                <span :class="`status-${item.status}`" class="status-badge">{{
+                  reviewStatusLabel(item.status)
+                }}</span>
               </td>
               <td class="comment-cell">{{ item.comment }}</td>
               <td class="admin-table__muted">{{ item.created_at }}</td>
@@ -66,25 +68,25 @@
                   @toggle="toggleRowMenu(item.id)"
                 >
                   <button
-                    type="button"
                     class="action-menu__item"
                     role="menuitem"
+                    type="button"
                     @click="onSetStatus(item.id, 'approved')"
                   >
                     Одобрить
                   </button>
                   <button
-                    type="button"
                     class="action-menu__item"
                     role="menuitem"
+                    type="button"
                     @click="onSetStatus(item.id, 'hidden')"
                   >
                     Скрыть
                   </button>
                   <button
-                    type="button"
                     class="action-menu__item action-menu__item--danger"
                     role="menuitem"
+                    type="button"
                     @click="onSetStatus(item.id, 'rejected')"
                   >
                     Отклонить
@@ -142,16 +144,8 @@ const filters = ref({
   status: 'pending',
 })
 
-const {
-  page,
-  limit,
-  offset,
-  total,
-  showPagination,
-  syncPageFromOffset,
-  resetPage,
-  onPageChange,
-} = useOffsetPagination(25)
+const { page, limit, offset, total, showPagination, syncPageFromOffset, resetPage, onPageChange } =
+  useOffsetPagination(25)
 
 function toggleRowMenu(id) {
   openRowMenuId.value = openRowMenuId.value === id ? null : id
@@ -207,7 +201,7 @@ onMounted(() => {
 })
 </script>
 
-<style scoped lang="scss">
+<style lang="scss" scoped>
 .comment-cell {
   min-width: 220px;
   max-width: 360px;

@@ -86,7 +86,7 @@
 
     <div v-if="showDeleteCommentModal" class="modal-overlay">
       <div class="modal">
-        <h3>Удалить комментарий?</h3>
+        <h3>Удалить отзыв?</h3>
         <div class="modal-actions">
           <button class="app-btn app-btn--danger" @click="confirmDeleteComment">Удалить</button>
           <button class="app-btn app-btn--ghost" @click="closeDeleteCommentModal">Отмена</button>
@@ -112,7 +112,7 @@ const tabs = [
   { id: 'info', label: 'Основная информация' },
   { id: 'favorites', label: 'Избранное' },
   { id: 'routes', label: 'Маршруты' },
-  { id: 'comments', label: 'Комментарии' },
+  { id: 'comments', label: 'Отзывы' },
 ]
 const activeTab = ref('info')
 const editMode = ref(false)
@@ -403,6 +403,36 @@ onMounted(async () => {
   justify-content: space-between;
   gap: 10px;
   align-items: center;
+}
+
+:deep(.comment-card__meta) {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+:deep(.comment-card__status) {
+  font-size: 0.75rem;
+  font-weight: 600;
+  border-radius: 999px;
+  padding: 0.15rem 0.55rem;
+}
+
+:deep(.comment-card__status--pending) {
+  background: #fff4d9;
+  color: #b8860b;
+}
+
+:deep(.comment-card__status--approved) {
+  background: #e6f3ec;
+  color: #2e8b57;
+}
+
+:deep(.comment-card__status--hidden),
+:deep(.comment-card__status--rejected) {
+  background: #fee4e2;
+  color: #b42318;
 }
 
 .modal-overlay {

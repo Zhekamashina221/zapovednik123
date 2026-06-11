@@ -86,18 +86,6 @@
                 </p>
               </section>
 
-              <section class="cr-block">
-                <h2 class="cr-block__h cr-block__h--accent">Особенности</h2>
-                <details v-for="(acc, ai) in highlightAccordions" :key="ai" class="cr-acc">
-                  <summary class="cr-acc__summary">
-                    <i :class="['bi', acc.iconClass, 'cr-acc__icon']" aria-hidden="true"></i>
-                    {{ acc.title }}
-                    <span aria-hidden="true" class="cr-acc__chev">▾</span>
-                  </summary>
-                  <p class="cr-acc__body">{{ acc.text }}</p>
-                </details>
-              </section>
-
               <p v-if="directionsError" class="cr-alert">{{ directionsError }}</p>
               <p v-else-if="buildingRoute" class="cr-muted">Построение линии маршрута…</p>
               <p v-if="mapHint" class="cr-hint">{{ mapHint }}</p>
@@ -150,71 +138,18 @@
                 </ul>
               </section>
 
-              <details class="cr-steps" open>
-                <summary class="cr-steps__summary">
-                  Повороты и указания
-                  <span v-if="routeSteps.length" class="cr-steps__count">{{ routeSteps.length }}</span>
-                </summary>
-
-                <ol v-if="routeSteps.length" class="cr-steps__list">
-                  <li v-for="(step, si) in routeSteps" :key="si" class="cr-steps__item">
-                    <span class="cr-steps__n">{{ si + 1 }}</span>
-                    <div class="cr-steps__main">
-                      <p class="cr-steps__instr">{{ step.instruction }}</p>
-                      <p v-if="stepMeta(step)" class="cr-steps__meta">{{ stepMeta(step) }}</p>
-                    </div>
-                  </li>
-                </ol>
-                <p v-else class="cr-steps__empty">Нет пошаговых указаний для этого профиля.</p>
-
-                <footer class="cr-steps__footer">
-                  <div class="cr-steps__footer-row">
-                    <span class="cr-steps__footer-label">или открыть в…</span>
-                    <div ref="exportWrapRef" class="cr-export-wrap">
-                      <button
-                        :aria-expanded="exportMenuOpen ? 'true' : 'false'"
-                        :disabled="!canExportRoute"
-                        aria-haspopup="menu"
-                        class="cr-export-trigger"
-                        type="button"
-                        @click.stop="toggleExportMenu"
-                      >
-                        Экспорт
-                        <span aria-hidden="true" class="cr-export-trigger__chev">▾</span>
-                      </button>
-                      <div v-if="exportMenuOpen" class="cr-export-menu" role="menu" @click.stop>
-                        <button
-                          class="cr-export-menu__item"
-                          role="menuitem"
-                          type="button"
-                          @click="pickExport('gpx')"
-                        >
-                          GPX
-                        </button>
-                        <button
-                          :disabled="!routeGeoJson"
-                          class="cr-export-menu__item"
-                          role="menuitem"
-                          type="button"
-                          @click="pickExport('geojson')"
-                        >
-                          GeoJSON
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                  <div aria-label="Открыть в картах" class="cr-ext__btns" role="group">
-                    <button class="cr-ext__btn" type="button" @click="openNavigatorYandex">
-                      <img :src="yandexMapsIcon" alt="" class="cr-ext__logo" height="18" width="18" />
-                      Яндекс
-                    </button>
-                    <button class="cr-ext__btn" type="button" @click="openNavigatorGoogle">
-                      <img :src="googleMapsIcon" alt="" class="cr-ext__logo" height="18" width="18" />
-                      Google
-                    </button>
-                  </div>
-                </footer>
-              </details>
+              <RouteDirectionsPanel
+                :collapsible="false"
+                :export-name="manifest.title"
+                :gpx-points="displayedGpxPoints"
+                :route-geojson="displayedRouteGeojson"
+                :steps="displayedSteps"
+                :summary="displayedSummary"
+                embedded-title="Повороты и указания"
+                variant="embedded"
+                @focus-step="focusMapOnStep"
+                @open-external="openExternalRoute"
+              />
 
               <p class="cr-ors">
                 Маршрутизация:
@@ -228,8 +163,68 @@
 
         <!-- Правая колонка: основная карта -->
         <div class="cr-map-main">
-          <div ref="mapHostRef" aria-label="Карта маршрута" class="cr-map" role="region">
+          <div
+            ref="mapHostRef"
+            :class="crMapClasses"
+            aria-label="Карта маршрута"
+            class="cr-map"
+            role="region"
+          >
             <div ref="mapEl" class="cr-map__canvas"></div>
+
+            <div v-if="pickupHint" class="route-overlay-hint" role="status">
+              <i aria-hidden="true" class="bi bi-hand-index-thumb route-overlay-hint__icon"></i>
+              <span>{{ pickupHint }}</span>
+            </div>
+
+            <div
+              v-show="!mapChromeHidden"
+              aria-label="Действия на карте"
+              class="map-ctrl-stack"
+              role="toolbar"
+            >
+              <button
+                aria-label="Показать моё местоположение на карте"
+                class="map-ctrl-btn map-ctrl-btn--icon"
+                title="Показать моё местоположение на карте"
+                type="button"
+                @click="goToMyLocation"
+              >
+                <i aria-hidden="true" class="bi bi-cursor-fill map-ctrl-btn__icon"></i>
+              </button>
+              <button
+                :aria-label="isMapFullscreen ? 'Выйти из полного экрана' : 'Открыть карту на весь экран'"
+                :title="isMapFullscreen ? 'Выйти из полного экрана' : 'На весь экран'"
+                class="map-ctrl-btn map-ctrl-btn--icon"
+                type="button"
+                @click="toggleFullscreen"
+              >
+                <i
+                  v-if="isMapFullscreen"
+                  aria-hidden="true"
+                  class="bi bi-fullscreen-exit map-ctrl-btn__icon"
+                ></i>
+                <i v-else aria-hidden="true" class="bi bi-fullscreen map-ctrl-btn__icon"></i>
+              </button>
+            </div>
+
+            <RouteSetupPanel
+              v-if="reservesOrdered.length"
+              v-show="!pickupHint"
+              v-model:start-source="userStartSource"
+              :loading="userRouteLoading"
+              :mobile-compact="userRouteActive"
+              :menu-open="userRouteMenuOpen"
+              :profile-hint="profileHint"
+              :route-active="userRouteActive"
+              :show-profile-select="false"
+              :start-point="userStartPoint"
+              panel-title="До первого объекта"
+              @build="onBuildUserRoute"
+              @clear="onClearUserRoute"
+              @close-menu="userRouteMenuOpen = false"
+              @open-menu="userRouteMenuOpen = true"
+            />
           </div>
         </div>
       </div>
@@ -240,6 +235,10 @@
 <script setup>
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
+import RouteDirectionsPanel from '@/components/route/RouteDirectionsPanel.vue'
+import RouteSetupPanel from '@/components/route/RouteSetupPanel.vue'
+import { useMobileMapLayout } from '@/composables/useBreakpoint.js'
+import { useUserOrsRoute } from '@/composables/useUserOrsRoute'
 import { getTypeConfig } from '@/config/reserveTypes.js'
 import {
   attachReserveMapPopupHandlers,
@@ -255,13 +254,8 @@ import {
   formatRouteDistanceMeters,
   formatRouteDurationSeconds,
   extractRoutePointsFromGeoJson,
-  buildGpxTrack,
-  downloadTextFile,
   createNumberedReserveIcon,
 } from '@/lib/curatedRouteMapDraw.js'
-
-import yandexMapsIcon from '@/assets/icons/yandex.png'
-import googleMapsIcon from '@/assets/icons/google-maps.png'
 
 const route = useRoute()
 const router = useRouter()
@@ -282,12 +276,31 @@ const orsDurationS = ref(null)
 const activeStopIdx = ref(-1)
 const routeSteps = ref([])
 const heroPhotoIdx = ref(0)
-const exportMenuOpen = ref(false)
-const exportWrapRef = ref(null)
+const isMapFullscreen = ref(false)
+const isMobileMap = useMobileMapLayout()
+
+const {
+  routeMenuOpen: userRouteMenuOpen,
+  routeActive: userRouteActive,
+  routeLoading: userRouteLoading,
+  routeSummary: userRouteSummary,
+  routeSteps: userRouteSteps,
+  pickupHint,
+  startSource: userStartSource,
+  startPoint: userStartPoint,
+  routeProfile: userRouteProfile,
+  lastRouteGeojson: userRouteGeojson,
+  attachMap: attachUserRouteMap,
+  detachMap: detachUserRouteMap,
+  requestBuild: requestUserRouteBuild,
+  clearUserRoute,
+  focusRouteStep,
+} = useUserOrsRoute()
 
 let mainMap = null
 let mainRouteDraw = null
 let mainMarkersLayer = null
+let userLocationMarker = null
 
 const teaserForList = computed(() => {
   const t = manifest.value?.teaser?.trim()
@@ -296,6 +309,17 @@ const teaserForList = computed(() => {
 })
 
 const profileHint = computed(() => profileLabel(manifest.value?.profile || 'driving-car'))
+
+const mapChromeHidden = computed(
+  () => Boolean(pickupHint.value) || (userRouteMenuOpen.value && !userRouteActive.value),
+)
+
+const crMapClasses = computed(() => ({
+  'cr-map--busy': mapChromeHidden.value,
+  'cr-map--picking': Boolean(pickupHint.value),
+  'cr-map--menu-open': userRouteMenuOpen.value && !userRouteActive.value,
+  'cr-map--route-active': userRouteActive.value,
+}))
 
 const profileChipIconClass = computed(() =>
   manifest.value?.profile === 'foot-walking' ? 'bi-person-walking' : 'bi-car-front-fill',
@@ -382,7 +406,32 @@ const gpxPoints = computed(() => {
     .filter((p) => Number.isFinite(p.lat) && Number.isFinite(p.lng))
 })
 
-const canExportRoute = computed(() => gpxPoints.value.length > 0)
+const displayedSteps = computed(() =>
+  userRouteActive.value ? userRouteSteps.value : routeSteps.value,
+)
+
+const displayedSummary = computed(() => {
+  if (userRouteActive.value && userRouteSummary.value) return userRouteSummary.value
+  if (orsDistanceM.value != null && orsDurationS.value != null) {
+    return {
+      distance: formatRouteDistanceMeters(orsDistanceM.value),
+      duration: formatRouteDurationSeconds(orsDurationS.value),
+    }
+  }
+  return null
+})
+
+const displayedRouteGeojson = computed(() =>
+  userRouteActive.value ? userRouteGeojson.value : routeGeoJson.value,
+)
+
+const displayedGpxPoints = computed(() => {
+  if (userRouteActive.value && userRouteGeojson.value) {
+    const pts = extractRoutePointsFromGeoJson(userRouteGeojson.value)
+    if (pts.length) return pts
+  }
+  return gpxPoints.value
+})
 
 function stopRole(idx) {
   const n = reservesOrdered.value.length
@@ -397,32 +446,12 @@ function stopPrimaryPhoto(r) {
   return String(first || '').trim()
 }
 
-function stepMeta(step) {
-  const parts = []
-  if (step.distance != null && Number.isFinite(step.distance)) {
-    const d = step.distance
-    parts.push(d >= 1000 ? `${(d / 1000).toFixed(1)} км` : `${Math.round(d)} м`)
-  }
-  if (step.duration != null && Number.isFinite(step.duration)) {
-    const s = step.duration
-    const m = Math.round(s / 60)
-    if (m > 0) parts.push(`≈ ${m} мин`)
-  }
-  return parts.join(' · ')
-}
-
 function escapeHtml(s) {
   return String(s)
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
-}
-
-function mapZoom(delta) {
-  if (!mainMap) return
-  const z = mainMap.getZoom()
-  mainMap.setZoom(Math.max(mainMap.getMinZoom(), Math.min(mainMap.getMaxZoom(), z + delta)))
 }
 
 function toggleFullscreen() {
@@ -442,6 +471,19 @@ function invalidateMapSizeSoon() {
 }
 
 function navigatorCoords() {
+  if (userRouteActive.value && userStartPoint.value) {
+    const first = reservesOrdered.value[0]
+    if (!first) return []
+    const start = {
+      lat: Number(userStartPoint.value.lat),
+      lng: Number(userStartPoint.value.lng),
+    }
+    const end = {
+      lat: Number(first.latitude),
+      lng: Number(first.longitude),
+    }
+    return [start, end].filter((p) => Number.isFinite(p.lat) && Number.isFinite(p.lng))
+  }
   return reservesOrdered.value
     .map((r) => ({
       lat: Number(r.latitude),
@@ -450,59 +492,90 @@ function navigatorCoords() {
     .filter((p) => Number.isFinite(p.lat) && Number.isFinite(p.lng))
 }
 
-function openNavigatorYandex() {
+function openExternalRoute(provider) {
   const c = navigatorCoords()
   if (!c.length) return
-  const rtext = c.map((p) => `${p.lat},${p.lng}`).join('~')
-  window.open(`https://yandex.ru/maps/?rtext=${rtext}`, '_blank', 'noopener,noreferrer')
-}
-
-function openNavigatorGoogle() {
-  const c = navigatorCoords()
-  if (!c.length) return
+  if (provider === 'yandex') {
+    const rtext = c.map((p) => `${p.lat},${p.lng}`).join('~')
+    window.open(`https://yandex.ru/maps/?rtext=${rtext}`, '_blank', 'noopener,noreferrer')
+    return
+  }
   const path = c.map((p) => `${p.lat},${p.lng}`).join('/')
   window.open(`https://www.google.com/maps/dir/${path}/`, '_blank', 'noopener,noreferrer')
 }
 
-function safeExportBasename() {
-  const name = manifest.value?.title || 'route'
-  return (
-    String(name)
-      .replace(/[^\w\u0400-\u04FF\-]+/g, '_')
-      .slice(0, 80) || 'route'
+function focusMapOnStep(step) {
+  focusRouteStep(mainMap, step)
+}
+
+function curatedRouteProfile() {
+  return manifest.value?.profile === 'foot-walking' ? 'foot-walking' : 'driving-car'
+}
+
+function onBuildUserRoute() {
+  if (!mainMap || !reservesOrdered.value.length) return
+  const first = reservesOrdered.value[0]
+  requestUserRouteBuild(
+    mainMap,
+    { profile: curatedRouteProfile() },
+    (msg) => {
+      mapHint.value = msg
+    },
+    () => ({
+      lat: Number(first.latitude),
+      lng: Number(first.longitude),
+    }),
   )
 }
 
-function downloadGpx() {
-  const pts = gpxPoints.value
-  if (!pts.length) return
-  const xml = buildGpxTrack(manifest.value?.title || 'route', pts)
-  downloadTextFile(`${safeExportBasename()}.gpx`, xml)
+function onClearUserRoute() {
+  clearUserRoute(mainMap)
 }
 
-function downloadGeoJson() {
-  if (!routeGeoJson.value) return
-  const json = JSON.stringify(routeGeoJson.value, null, 2)
-  downloadTextFile(`${safeExportBasename()}.geojson`, json, 'application/geo+json')
-}
-
-function toggleExportMenu() {
-  if (!canExportRoute.value) return
-  exportMenuOpen.value = !exportMenuOpen.value
-}
-
-function pickExport(format) {
-  exportMenuOpen.value = false
-  if (format === 'gpx') downloadGpx()
-  else downloadGeoJson()
-}
-
-function onDocumentClick(event) {
-  if (!exportMenuOpen.value) return
-  const wrap = exportWrapRef.value
-  if (wrap && !wrap.contains(event.target)) {
-    exportMenuOpen.value = false
+function removeUserLocationMarker() {
+  if (userLocationMarker && mainMap) {
+    mainMap.removeLayer(userLocationMarker)
+    userLocationMarker = null
   }
+}
+
+function goToMyLocation() {
+  if (!mainMap) return
+  if (!('geolocation' in navigator)) {
+    mapHint.value = 'Геолокация недоступна в этом браузере.'
+    return
+  }
+  navigator.geolocation.getCurrentPosition(
+    (pos) => {
+      const lat = pos.coords.latitude
+      const lng = pos.coords.longitude
+      removeUserLocationMarker()
+      userLocationMarker = L.circleMarker([lat, lng], {
+        radius: 8,
+        color: '#256f46',
+        fillColor: '#3cb371',
+        fillOpacity: 1,
+        weight: 2,
+      })
+        .addTo(mainMap)
+        .bindPopup('Вы здесь')
+      const z = Math.max(mainMap.getZoom(), 13)
+      if (typeof mainMap.flyTo === 'function') {
+        mainMap.flyTo([lat, lng], z, { duration: 0.45 })
+      } else {
+        mainMap.setView([lat, lng], z)
+      }
+    },
+    () => {
+      mapHint.value = 'Не удалось определить местоположение. Проверьте доступ к геолокации.'
+    },
+    { timeout: 12000, enableHighAccuracy: false },
+  )
+}
+
+function onFullscreenChange() {
+  isMapFullscreen.value = document.fullscreenElement === mapHostRef.value
+  invalidateMapSizeSoon()
 }
 
 function setupMapPopups(map) {
@@ -528,7 +601,8 @@ async function loadAndBuild() {
   orsDurationS.value = null
   activeStopIdx.value = -1
   heroPhotoIdx.value = 0
-  exportMenuOpen.value = false
+  clearUserRoute(mainMap)
+  userRouteMenuOpen.value = false
 
   let m = null
   try {
@@ -552,6 +626,7 @@ async function loadAndBuild() {
 
   notFound.value = false
   manifest.value = m
+  userRouteProfile.value = curatedRouteProfile()
 
   try {
     const results = await Promise.all(
@@ -582,6 +657,7 @@ async function loadAndBuild() {
   if (!mapEl.value || !reservesOrdered.value.length) return
 
   initMainMap()
+  attachUserRouteMap(mainMap)
   setupMapPopups(mainMap)
   mainMarkersLayer = addNumberedMarkers(mainMap)
   invalidateMapSizeSoon()
@@ -703,6 +779,9 @@ function addNumberedMarkers(map) {
 }
 
 function destroyMaps() {
+  clearUserRoute(mainMap)
+  detachUserRouteMap(mainMap)
+  removeUserLocationMarker()
   if (mainRouteDraw) {
     mainRouteDraw.remove()
     mainRouteDraw = null
@@ -728,13 +807,14 @@ watch(heroGalleryPhotos, (photos) => {
   if (heroPhotoIdx.value >= photos.length) heroPhotoIdx.value = 0
 })
 
+
 onMounted(() => {
-  document.addEventListener('click', onDocumentClick, true)
+  document.addEventListener('fullscreenchange', onFullscreenChange)
   void loadAndBuild()
 })
 
 onUnmounted(() => {
-  document.removeEventListener('click', onDocumentClick, true)
+  document.removeEventListener('fullscreenchange', onFullscreenChange)
   destroyMaps()
 })
 </script>
@@ -852,12 +932,64 @@ $cr-left-col: minmax(300px, min(420px, 38vw));
   }
 
   .cr-map {
-    height: min(42vh, 360px);
+    height: clamp(360px, 68vh, 620px);
   }
 
-  .cr-steps__footer-row {
-    flex-direction: column;
-    align-items: flex-start;
+  .cr-map--menu-open {
+    height: clamp(380px, 72vh, 640px);
+  }
+
+  .cr-map--route-active {
+    height: clamp(340px, 62vh, 560px);
+  }
+
+  .cr-map--picking {
+    height: clamp(400px, 76vh, 680px);
+  }
+
+  .map-ctrl-stack {
+    bottom: 10px;
+    right: 8px;
+  }
+
+  .route-overlay-hint {
+    top: 10px;
+    max-width: min(96%, 360px);
+    font-size: 0.8rem;
+    padding: 0.45rem 0.75rem;
+  }
+
+  .cr-map :deep(.route-fab) {
+    top: 10px;
+    left: 10px;
+    padding: 0.55rem 0.8rem;
+  }
+
+  .cr-map :deep(.route-setup) {
+    top: auto;
+    bottom: 10px;
+    left: 10px;
+    right: 10px;
+    width: auto;
+    max-height: min(34vh, 240px);
+    overflow-y: auto;
+  }
+
+  .cr-map :deep(.route-setup--with-route),
+  .cr-map :deep(.route-setup--mobile-compact) {
+    top: 8px;
+    bottom: auto;
+    max-height: min(28vh, 200px);
+  }
+
+  .cr-map--busy :deep(.route-fab) {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .cr-map--picking :deep(.route-fab) {
+    opacity: 1;
+    pointer-events: auto;
   }
 }
 
@@ -1134,7 +1266,7 @@ $cr-left-col: minmax(300px, min(420px, 38vw));
   }
 
   @media (max-width: 960px) {
-    height: min(48vh, 480px);
+    height: clamp(380px, 64vh, 600px);
     border-left: none;
     border-top: 1px solid #e2e8f0;
   }
@@ -1148,34 +1280,86 @@ $cr-left-col: minmax(300px, min(420px, 38vw));
   z-index: 0;
 }
 
-.cr-map__tools {
+.map-ctrl-stack {
   position: absolute;
-  top: 10px;
-  right: 10px;
-  z-index: 10;
+  bottom: 12px;
+  right: 12px;
+  z-index: 700;
   display: flex;
-  flex-direction: column;
-  gap: 6px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.35rem;
 }
 
-.cr-map-tool {
-  width: 38px;
-  height: 38px;
+.map-ctrl-btn {
+  padding: 0.45rem 0.55rem;
+  border: 1px solid rgba($route-green, 0.25);
   border-radius: 10px;
-  border: 1px solid rgba(15, 23, 42, 0.08);
-  background: rgba(255, 255, 255, 0.95);
-  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.12);
+  background: #fff;
+  color: $route-green-dark;
+  font-size: 0.78rem;
+  font-weight: 600;
   cursor: pointer;
-  font-size: 1.05rem;
-  font-weight: 700;
-  line-height: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #0f172a;
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.12);
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease;
 
   &:hover {
-    background: #fff;
+    background: #f6fcf9;
+    border-color: $route-green;
+    color: #0f3d24;
+  }
+
+  &--icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    padding: 0;
+  }
+}
+
+.map-ctrl-btn__icon {
+  font-size: 1.15rem;
+  line-height: 1;
+  display: block;
+  color: $route-green-dark;
+}
+
+.route-overlay-hint {
+  position: absolute;
+  top: 52px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  max-width: min(92%, 420px);
+  padding: 0.55rem 0.95rem;
+  border-radius: 999px;
+  background: #fff;
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.12);
+  border: 1px solid rgba($route-green, 0.2);
+  font-size: 0.86rem;
+  color: #334155;
+  text-align: center;
+  pointer-events: none;
+}
+
+.route-overlay-hint__icon {
+  flex-shrink: 0;
+  color: $route-green;
+  font-size: 1rem;
+}
+
+.cr-map:fullscreen {
+  :deep(.route-fab),
+  :deep(.route-setup),
+  .map-ctrl-stack {
+    z-index: 10000;
   }
 }
 
@@ -1343,224 +1527,6 @@ $cr-left-col: minmax(300px, min(420px, 38vw));
   font-size: 1.15rem;
   font-weight: 700;
   color: #cbd5e1;
-}
-
-.cr-steps__empty {
-  margin: 0;
-  padding: 10px 4px 12px;
-  font-size: 0.78rem;
-  color: #94a3b8;
-  border-top: 1px solid #f1f5f9;
-}
-
-.cr-steps__footer {
-  margin-top: 10px;
-  padding-top: 12px;
-  border-top: 1px solid #e2e8f0;
-}
-
-.cr-steps__footer-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  margin-bottom: 8px;
-}
-
-.cr-steps__footer-label {
-  font-size: 0.72rem;
-  font-weight: 600;
-  color: #94a3b8;
-}
-
-.cr-export-wrap {
-  position: relative;
-  flex-shrink: 0;
-}
-
-.cr-export-trigger {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.2rem;
-  padding: 0.32rem 0.55rem;
-  border-radius: 8px;
-  border: 1px solid rgba($route-green, 0.28);
-  background: #f6fcf9;
-  font-size: 0.72rem;
-  font-weight: 700;
-  color: $route-green-dark;
-  cursor: pointer;
-
-  &:disabled {
-    opacity: 0.45;
-    cursor: not-allowed;
-  }
-}
-
-.cr-export-trigger__chev {
-  font-size: 0.62rem;
-  opacity: 0.75;
-}
-
-.cr-export-menu {
-  position: absolute;
-  right: 0;
-  bottom: calc(100% + 4px);
-  z-index: 30;
-  min-width: 7.5rem;
-  padding: 0.2rem;
-  border-radius: 8px;
-  border: 1px solid #e2e8f0;
-  background: #fff;
-  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.12);
-}
-
-.cr-export-menu__item {
-  display: block;
-  width: 100%;
-  padding: 0.38rem 0.55rem;
-  border: none;
-  border-radius: 6px;
-  background: transparent;
-  font-size: 0.72rem;
-  font-weight: 600;
-  color: #334155;
-  text-align: left;
-  cursor: pointer;
-
-  &:hover:not(:disabled) {
-    background: #ecfdf3;
-    color: $route-green-dark;
-  }
-
-  &:disabled {
-    opacity: 0.45;
-    cursor: not-allowed;
-  }
-}
-
-.cr-ext__btns {
-  display: flex;
-  gap: 6px;
-}
-
-.cr-ext__btn {
-  flex: 1;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  padding: 0.38rem 0.5rem;
-  border-radius: 8px;
-  border: 1px solid #e2e8f0;
-  background: #fff;
-  font-size: 0.72rem;
-  font-weight: 600;
-  color: #334155;
-  cursor: pointer;
-
-  &:hover {
-    border-color: $route-green;
-    background: #f6fcf9;
-    color: $route-green-dark;
-  }
-}
-
-.cr-ext__logo {
-  flex-shrink: 0;
-  object-fit: contain;
-}
-
-.cr-steps {
-  margin: 14px 0 0;
-  padding: 10px 12px;
-  border-radius: 12px;
-  border: 1px solid #e2e8f0;
-  background: #fff;
-}
-
-.cr-steps__summary {
-  cursor: pointer;
-  font-size: 0.88rem;
-  font-weight: 700;
-  color: #0f172a;
-  list-style: none;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-
-  &::-webkit-details-marker {
-    display: none;
-  }
-}
-
-.cr-steps__count {
-  font-size: 0.72rem;
-  font-weight: 700;
-  color: $route-green-dark;
-  background: #ecfdf3;
-  padding: 2px 8px;
-  border-radius: 999px;
-}
-
-.cr-steps__note {
-  margin: 10px 0 8px;
-  font-size: 0.72rem;
-  line-height: 1.45;
-  color: #94a3b8;
-}
-
-.cr-steps__list {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  max-height: min(320px, 40vh);
-  overflow-y: auto;
-  border-top: 1px solid #f1f5f9;
-}
-
-.cr-steps__item {
-  display: flex;
-  gap: 10px;
-  padding: 10px 4px 10px 0;
-  border-bottom: 1px solid #f1f5f9;
-
-  &:last-child {
-    border-bottom: none;
-  }
-}
-
-.cr-steps__n {
-  flex-shrink: 0;
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  background: #f1f5f9;
-  font-size: 0.68rem;
-  font-weight: 800;
-  color: #64748b;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-top: 2px;
-}
-
-.cr-steps__main {
-  min-width: 0;
-}
-
-.cr-steps__instr {
-  margin: 0;
-  font-size: 0.8rem;
-  line-height: 1.45;
-  color: #334155;
-}
-
-.cr-steps__meta {
-  margin: 4px 0 0;
-  font-size: 0.68rem;
-  color: #94a3b8;
 }
 
 .cr-ors {

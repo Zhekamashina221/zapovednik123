@@ -116,7 +116,7 @@ export function useProfileData() {
       const res = await api.getMyReviews()
       myComments.value = res.data?.data || []
     } catch (error) {
-      commentsError.value = error?.response?.data?.error || 'Не удалось загрузить комментарии.'
+      commentsError.value = error?.response?.data?.error || 'Не удалось загрузить отзывы.'
     } finally {
       loadingComments.value = false
     }
@@ -157,9 +157,9 @@ export function useProfileData() {
     try {
       await api.deleteMyReview(commentId)
       myComments.value = myComments.value.filter((comment) => comment.id !== commentId)
-      return { ok: true, message: 'Комментарий удален.' }
+      return { ok: true, message: 'Отзыв удален.' }
     } catch (error) {
-      const message = error?.response?.data?.error || 'Не удалось удалить комментарий.'
+      const message = error?.response?.data?.error || 'Не удалось удалить отзыв.'
       commentsError.value = message
       return { ok: false, message }
     } finally {

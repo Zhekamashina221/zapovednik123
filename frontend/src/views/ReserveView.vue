@@ -237,16 +237,22 @@
             :export-name="reserve.name"
             :has-coordinates="Boolean(reserve.latitude && reserve.longitude)"
             :is-logged-in="auth.isLoggedIn"
+            :latitude="reserve.latitude"
+            :location-label="locationLine"
+            :longitude="reserve.longitude"
             :pickup-hint="pickupHint"
             :route-active="routeActive"
             :route-geojson="lastRouteGeojson"
             :route-loading="routeLoading"
             :route-menu-open="routeMenuOpen"
             :route-saving="routeSaving"
+            :route-build-start-source="buildStartSource"
+            :route-start-point="startPoint"
             :route-steps="routeSteps"
             :route-summary="routeSummary"
             @add-via="startPickingVia"
             @build-route-requested="onBuildRouteRequested"
+            @copy-coords="copyCoords"
             @focus-route-step="focusRouteStep"
             @clear-route="clearRoute"
             @close-route-menu="routeMenuOpen = false"
@@ -265,6 +271,7 @@
         >
           <ReserveReviewsSection
             ref="reviewsSectionRef"
+            :avg-rating="reserve.avg_rating"
             :can-submit-review="canSubmitReview"
             :format-review-date="formatReviewDate"
             :is-logged-in="auth.isLoggedIn"
@@ -272,8 +279,10 @@
             :review-submit-error="reviewSubmitError"
             :review-submitting="reviewSubmitting"
             :reviews="reviews"
+            :reviews-count="Number(reserve.reviews_count) || 0"
             :reviews-error="reviewsError"
             :reviews-loading="reviewsLoading"
+            :user-review="userReview"
             @go-login="goLogin"
             @submit-review="onSubmitReview"
           />
@@ -335,6 +344,7 @@ const { reserve, loading, isFavorite, favoriteLoading, loadReserve, toggleFavori
   useReserveDetails(id, reservesStore)
 const {
   reviews,
+  userReview,
   reviewsLoading,
   reviewsError,
   reviewSubmitting,
@@ -344,6 +354,8 @@ const {
   loadReviews,
   submitReview,
 } = useReserveReviews(id)
+
+const loadReserveReviews = () => loadReviews(auth.isLoggedIn)
 const {
   routeMenuOpen,
   routeActive,
@@ -351,6 +363,8 @@ const {
   routeSummary,
   routeSteps,
   pickupHint,
+  startPoint,
+  buildStartSource,
   canAddVia,
   routeProfile,
   lastRouteGeojson,
@@ -433,15 +447,15 @@ const quickChips = computed(() => {
 })
 
 const reviewsAnchorLabel = computed(() => {
-  const n = reviews.value?.length ?? 0
-  return n > 0 ? `Комментарии (${n})` : 'Комментарии'
+  const n = Number(reserve.value?.reviews_count) || reviews.value?.length || 0
+  return n > 0 ? `Отзывы (${n})` : 'Отзывы'
 })
 
 const hasPageSections = computed(
   () =>
     Boolean(descriptionText.value) ||
     Boolean(reserve.value?.latitude && reserve.value?.longitude) ||
-    true /* комментарии всегда на странице */,
+    true /* отзывы всегда на странице */,
 )
 
 const hasLongDescription = computed(() => descriptionText.value.length > DESCRIPTION_PREVIEW_LEN)
@@ -501,7 +515,6 @@ const onOpenExternalRoute = (provider) => {
 }
 
 const onBuildRouteRequested = (payload) => {
-  routeMenuOpen.value = false
   if (reserve.value) {
     requestRouteFromModal(reserve.value, payload, setFeedback)
   }
@@ -585,7 +598,7 @@ const onSaveRoute = async () => {
 
 onMounted(() => {
   if (id.value) {
-    loadReserve(loadReviews)
+    loadReserve(loadReserveReviews)
   }
 })
 
@@ -593,7 +606,7 @@ watch(id, (nextId, prevId) => {
   if (!nextId || nextId === prevId) return
   clearRoute()
   routeMenuOpen.value = false
-  loadReserve(loadReviews)
+  loadReserve(loadReserveReviews)
 })
 
 watch(
@@ -1031,196 +1044,6 @@ $light: #f8f9fa;
 
 .reserve__description {
   margin-bottom: 3rem;
-}
-
-.reserve__reviews {
-  margin-bottom: 3rem;
-  min-width: 0;
-}
-
-.reviews-card {
-  background: #f4fbf8;
-  border: 1px solid #dfeee8;
-  border-radius: 18px;
-  padding: 1rem;
-  margin-top: 1rem;
-  box-shadow: 0 8px 24px rgba(46, 139, 87, 0.08);
-  min-width: 0;
-}
-
-.review-form {
-  display: grid;
-  gap: 0.65rem;
-  margin-bottom: 1.25rem;
-  background: #ffffff;
-  border: 1px solid #e6f0eb;
-  border-radius: 14px;
-  padding: 0.9rem;
-}
-
-.review-form__label {
-  display: grid;
-  gap: 0.35rem;
-  font-weight: 500;
-  color: $gray;
-  font-size: 0.92rem;
-}
-
-.review-stars {
-  display: flex;
-  align-items: center;
-  gap: 0.35rem;
-}
-
-.review-star-btn {
-  border: none;
-  background: transparent;
-  color: #bfc7c3;
-  cursor: pointer;
-  font-size: 1.35rem;
-  line-height: 1;
-  padding: 0.1rem;
-  transition:
-    color 0.2s ease,
-    transform 0.2s ease;
-
-  &:hover {
-    color: #ffc861;
-    transform: translateY(-1px);
-  }
-
-  &.active {
-    color: #f5b942;
-  }
-}
-
-.review-stars__value {
-  margin-left: 0.45rem;
-  font-size: 0.86rem;
-  color: $gray;
-}
-
-.review-form__input {
-  width: 100%;
-  min-width: 0;
-  max-width: 100%;
-  border: 1px solid #deebe5;
-  border-radius: 10px;
-  padding: 0.65rem 0.75rem;
-  font-size: 0.95rem;
-  background: #fbfefd;
-  overflow-wrap: anywhere;
-  word-break: break-word;
-
-  &:focus {
-    outline: none;
-    border-color: #9fd3bf;
-    box-shadow: 0 0 0 3px rgba(111, 191, 158, 0.18);
-  }
-}
-
-.review-form__meta {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.5rem;
-}
-
-.review-form__submit {
-  background: $accent;
-  color: white;
-  border: none;
-  border-radius: 10px;
-  padding: 0.6rem 1rem;
-  font-weight: 600;
-  cursor: pointer;
-
-  &:hover:not(:disabled) {
-    background: $primary;
-  }
-}
-
-.review-form__submit:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.review-form__error {
-  margin: 0;
-  color: #d9534f;
-}
-
-.reviews-auth-cta {
-  display: grid;
-  justify-items: center;
-  gap: 0.75rem;
-  margin-bottom: 1rem;
-  background: #ffffff;
-  border: 1px solid #e6f0eb;
-  border-radius: 14px;
-  padding: 1rem;
-}
-
-.reviews-list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: grid;
-  gap: 0.85rem;
-  min-width: 0;
-}
-
-.reviews-item {
-  border: 1px solid #e1ece7;
-  background: #fff;
-  border-radius: 14px;
-  padding: 0.95rem;
-  min-width: 0;
-}
-
-.reviews-item__comment {
-  margin: 0.65rem 0 0;
-  color: #2b3631;
-  line-height: 1.45;
-  max-width: 100%;
-  overflow-wrap: anywhere;
-  word-break: break-word;
-}
-
-.reviews-item__header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 0.75rem;
-  min-width: 0;
-}
-
-.reviews-item__identity {
-  display: grid;
-  gap: 0.15rem;
-  min-width: 0;
-}
-
-.reviews-item__identity strong {
-  overflow-wrap: anywhere;
-  word-break: break-word;
-}
-
-.reviews-item__identity small {
-  color: #7d8f86;
-}
-
-.reviews-item__stars {
-  flex-shrink: 0;
-  color: #f5b942;
-  letter-spacing: 1px;
-  white-space: nowrap;
-}
-
-.reviews-empty {
-  margin: 0.25rem 0;
-  color: $gray;
-  font-size: 0.86rem;
 }
 
 .route-control-btn,
@@ -1826,8 +1649,7 @@ $light: #f8f9fa;
   min-width: 0;
 
   .reserve__description,
-  .reserve__map-section,
-  .reserve__reviews {
+  .reserve__map-section {
     margin-bottom: 0;
   }
 
@@ -1838,10 +1660,6 @@ $light: #f8f9fa;
     font-weight: 800;
   }
 
-  &--reviews .reviews-card {
-    margin-top: 0.75rem;
-    background: #f8fcf9;
-  }
 }
 
 .reserve__sections {
@@ -2447,10 +2265,6 @@ $light: #f8f9fa;
 
   .reserve__description {
     margin-bottom: 1.75rem;
-  }
-
-  .reserve__reviews {
-    margin-bottom: 1.5rem;
   }
 
   .section-title,

@@ -3,11 +3,7 @@
     <section :style="{ backgroundImage: `url(${listHeroUrl})` }" class="page-hero">
       <div class="page-hero__overlay" />
       <div class="container page-hero__inner">
-        <h1 class="page-hero__title">
-          Список объектов природного наследия
-          <span class="page-hero__accent">Беларуси</span>
-          <span aria-hidden="true" class="page-hero__leaf">🌿</span>
-        </h1>
+        <h1 class="page-hero__title">Список объектов природного наследия</h1>
         <p class="page-hero__subtitle">Исследуйте уникальные природные объекты нашей страны</p>
       </div>
     </section>
@@ -15,40 +11,44 @@
     <div class="container list-page__body">
       <div class="list-panel">
         <div class="list-panel__intro">
-        <div
-          :aria-busy="loading ? 'true' : 'false'"
-          :class="{ 'list-results-summary--loading': loading }"
-          aria-live="polite"
-          class="list-results-summary"
-          role="status"
-        >
-          <div class="list-results-summary__body">
-            <template v-if="loading">
-              <span class="list-results-summary__skeleton list-results-summary__skeleton--value" />
-              <span class="list-results-summary__skeleton list-results-summary__skeleton--hint" />
-            </template>
-            <template v-else>
-              <p class="list-results-summary__headline">
-                <span class="list-results-summary__value">{{ formattedTotal }}</span>
-                <span class="list-results-summary__unit">{{ resultsObjectWord }}</span>
-              </p>
-            </template>
+          <div
+            :aria-busy="loading ? 'true' : 'false'"
+            :class="{ 'list-results-summary--loading': loading }"
+            aria-live="polite"
+            class="list-results-summary"
+            role="status"
+          >
+            <div class="list-results-summary__body">
+              <template v-if="loading">
+                <span
+                  class="list-results-summary__skeleton list-results-summary__skeleton--value"
+                />
+                <span class="list-results-summary__skeleton list-results-summary__skeleton--hint" />
+              </template>
+              <template v-else>
+                <p class="list-results-summary__headline">
+                  <span class="list-results-summary__value">{{ formattedTotal }}</span>
+                  <span class="list-results-summary__unit">{{ resultsObjectWord }}</span>
+                </p>
+              </template>
+            </div>
           </div>
-        </div>
-        <div class="list-panel__filters">
-          <FilterPanel
-            :sort-value="`${sorting.by}:${sorting.dir}`"
-            layout="list"
-            @sort-change="onSortChange"
-          />
-        </div>
+          <div class="list-panel__filters">
+            <FilterPanel
+              :sort-value="`${sorting.by}:${sorting.dir}`"
+              layout="list"
+              @sort-change="onSortChange"
+            />
+          </div>
         </div>
 
         <div v-if="loading" class="list-panel__loading">Загрузка…</div>
 
         <div v-else-if="showEmptyResults" class="list-panel__empty">
           <p class="list-panel__empty-title">
-            {{ hasActiveFilters ? 'По выбранным фильтрам ничего не найдено' : 'Объекты не найдены' }}
+            {{
+              hasActiveFilters ? 'По выбранным фильтрам ничего не найдено' : 'Объекты не найдены'
+            }}
           </p>
           <p v-if="hasActiveFilters" class="list-panel__empty-hint">
             Попробуйте ослабить условия или сбросить все фильтры.
@@ -390,7 +390,11 @@ onUnmounted(() => {
   text-align: center;
   border-radius: 14px;
   border: 1px dashed rgba($color-primary, 0.22);
-  background: linear-gradient(180deg, rgba($color-secondary, 0.08) 0%, rgba($color-surface, 1) 100%);
+  background: linear-gradient(
+    180deg,
+    rgba($color-secondary, 0.08) 0%,
+    rgba($color-surface, 1) 100%
+  );
 }
 
 .list-panel__empty-title {
