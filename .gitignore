@@ -1,0 +1,30 @@
+# Secrets and local config
+backend/.env
+frontend/.env
+frontend/.env.local
+
+# Dependencies
+node_modules/
+
+# Build
+frontend/dist/
+
+# Database (local dev data)
+backend/reserves.db
+backend/reserves.db.backup.*
+backend/*.db-journal
+backend/*.db-wal
+backend/*.db-shm
+
+# Mirrored media and mirror logs
+backend/uploads/
+backend/logs/
+uploads.zip
+
+# Local backups (large DB dumps)
+backup/
+
+# OS / IDE
+.DS_Store
+Thumbs.db
+.idea/

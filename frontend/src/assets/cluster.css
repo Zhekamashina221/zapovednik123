@@ -1,0 +1,128 @@
+/**
+ * Кластеры: класс `custom-cluster cluster-b{N}` — размеры совпадают с CLUSTER_TIERS в Map.vue.
+ * Пороги (min count): bx <5 | b0 ≥5 | b1 ≥15 | b2 ≥35 | b3 ≥60 | b4 ≥100 | b5 ≥150 | b6 ≥250 | b7 ≥400 | b8 ≥600
+ */
+
+.custom-cluster {
+  box-sizing: border-box !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: var(--color-background, #f5f5f5) !important;
+  border: 2px solid var(--color-primary, #2e8b57) !important;
+  border-radius: 50% !important;
+  color: var(--color-text, #333333) !important;
+  font-weight: 900 !important;
+  text-align: center !important;
+}
+
+.cluster-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  line-height: 1.05;
+  padding: 0 2px;
+}
+
+.cluster-count {
+  font-variant-numeric: tabular-nums;
+}
+
+.cluster-unit {
+  display: block;
+  font-size: 0.72em;
+  font-weight: 600;
+  margin-top: 1px;
+  opacity: 0.85;
+}
+
+.custom-cluster.cluster-bx {
+  width: 45px !important;
+  height: 45px !important;
+}
+
+.custom-cluster.cluster-bx .cluster-count {
+  font-size: 13px;
+}
+
+.custom-cluster.cluster-b0 {
+  width: 50px !important;
+  height: 50px !important;
+}
+
+.custom-cluster.cluster-b0 .cluster-count {
+  font-size: 13px;
+}
+
+.custom-cluster.cluster-b1 {
+  width: 60px !important;
+  height: 60px !important;
+}
+
+.custom-cluster.cluster-b1 .cluster-count {
+  font-size: 13px;
+}
+
+.custom-cluster.cluster-b2 {
+  width: 56px !important;
+  height: 56px !important;
+}
+
+.custom-cluster.cluster-b2 .cluster-count {
+  font-size: 14px;
+}
+
+.custom-cluster.cluster-b3 {
+  width: 62px !important;
+  height: 62px !important;
+}
+
+.custom-cluster.cluster-b3 .cluster-count {
+  font-size: 15px;
+}
+
+.custom-cluster.cluster-b4 {
+  width: 70px !important;
+  height: 70px !important;
+}
+
+.custom-cluster.cluster-b4 .cluster-count {
+  font-size: 16px;
+}
+
+.custom-cluster.cluster-b5 {
+  width: 80px !important;
+  height: 80px !important;
+}
+
+.custom-cluster.cluster-b5 .cluster-count {
+  font-size: 17px;
+}
+
+.custom-cluster.cluster-b6 {
+  width: 90px !important;
+  height: 90px !important;
+}
+
+.custom-cluster.cluster-b6 .cluster-count {
+  font-size: 18px;
+}
+
+.custom-cluster.cluster-b7 {
+  width: 92px !important;
+  height: 92px !important;
+}
+
+.custom-cluster.cluster-b7 .cluster-count {
+  font-size: 19px;
+}
+
+.custom-cluster.cluster-b8 {
+  width: 110px !important;
+  height: 110px !important;
+}
+
+.custom-cluster.cluster-b8 .cluster-count {
+  font-size: 20px;
+}

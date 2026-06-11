@@ -1,0 +1,125 @@
+.type-select-wrap {
+  position: relative;
+}
+
+.type-trigger {
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  text-align: left;
+}
+
+.type-trigger:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
+.type-trigger__label {
+  color: #344054;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.type-trigger__arrow {
+  flex-shrink: 0;
+  color: #667085;
+  transition: transform 0.2s ease;
+}
+
+.type-trigger__arrow--open {
+  transform: rotate(180deg);
+}
+
+.type-dropdown {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  width: 100%;
+  max-height: 240px;
+  overflow-y: auto;
+  z-index: 120;
+  padding: 6px;
+  border-radius: 12px;
+  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.12);
+}
+
+.type-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 9px 10px;
+  border: none;
+  border-radius: 10px;
+  background: transparent;
+  color: #344054;
+  font-size: 0.88rem;
+  font-weight: 500;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s ease;
+}
+
+.type-option:hover {
+  background: #f6f8fa;
+}
+
+.type-option--active {
+  background: #ecfdf3;
+  color: #1f6b42;
+  font-weight: 600;
+}
+
+.type-option__label {
+  flex: 1;
+  min-width: 0;
+}
+
+.type-option__check {
+  flex-shrink: 0;
+  margin-left: auto;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #2e8b57;
+  line-height: 1;
+}
+
+.district-group__header {
+  padding: 8px 10px 4px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #667085;
+}
+
+.district-group__item {
+  padding-left: 14px;
+}
+
+.admin-toolbar,
+.admin-filters,
+.admin-form,
+.admin-form-modal,
+.form-section,
+.region-district-select {
+  .type-select-wrap {
+    overflow: visible;
+  }
+}
+
+.admin-form-modal .type-dropdown {
+  z-index: 2600;
+}
+
+.admin-table-card {
+  overflow: visible;
+}
+
+.admin-table-wrap {
+  overflow-x: auto;
+  overflow-y: visible;
+}

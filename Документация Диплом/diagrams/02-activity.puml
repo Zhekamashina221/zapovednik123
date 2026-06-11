@@ -1,0 +1,78 @@
+@startuml activity_zapovednik
+skinparam shadowing false
+skinparam ActivityBackgroundColor #F8F9FA
+skinparam ActivityBorderColor #333333
+
+title Диаграмма деятельности — избранное и построение маршрута
+
+|Клиент (Vue 3)|
+start
+:Открытие карточки ООПТ;
+
+|Сервер (Express API)|
+:GET /api/reserves/:id;
+:Загрузка фото и сведений\nиз таблиц reserves, photos;
+
+|Клиент (Vue 3)|
+:Отображение карточки;
+
+if (Пользователь авторизован?) then (да)
+  |Сервер (Express API)|
+  :Проверка JWT;
+  :GET статус избранного\nи список отзывов;
+  |Клиент (Vue 3)|
+  :Показ кнопки «В избранном»\nи блока отзывов;
+else (нет)
+  :Только просмотр;
+endif
+
+:Нажатие «В избранное»;
+
+if (Пользователь авторизован?) then (нет)
+  :Переход на страницу входа;
+  stop
+else (да)
+endif
+
+|Сервер (Express API)|
+if (Объект уже в избранном?) then (да)
+  :DELETE /api/favorites/:reserveId;
+else (нет)
+  :POST /api/favorites;
+endif
+
+|База данных SQLite|
+:Изменение таблицы favorites;
+
+|Клиент (Vue 3)|
+:Обновление UI на карте,\nв списке и карточке;
+
+:Запрос построения маршрута;
+
+if (Способ задания старта?) then (геолокация)
+  :Получение координат\nчерез Geolocation API;
+elseif (точка на карте) then
+  :Выбор точки на карте Leaflet;
+else (внешний навигатор)
+  :Формирование ссылки\nдля навигатора;
+  stop
+endif
+
+|Сервер (Express API)|
+:POST /api/routing\n(координаты старта и объекта);
+:Запрос к OpenRouteService;
+
+|Клиент (Vue 3)|
+:Отрисовка GeoJSON на карте;
+:Вывод длины и времени;
+
+if (Сохранить маршрут?) then (да)
+  |Сервер (Express API)|
+  :POST /api/saved-routes;
+  |База данных SQLite|
+  :INSERT в user_saved_routes;
+endif
+
+stop
+
+@enduml

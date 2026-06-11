@@ -1,0 +1,40 @@
+{
+    "users": {
+      "id": 1,
+      "email": "root@root.com",
+      "password_hash": "$2b$10$jk71/uBkwBk/RMo4RrrwouWXqH/UKC9wCR3Jj0JfHAbzObrJ/H4z.",
+      "name": "root"
+    },
+    "sqlite_sequence": {
+      "name": "photos",
+      "seq": 2870
+    },
+    "reserves": {
+      "id": 41,
+      "name": "Березинский биосферный заповедник",
+      "type": "заказник",
+      "created": "1925 г.",
+      "status_text": "местный",
+      "status_date": null,
+      "phone": "8 02132 37-744",
+      "email": null,
+      "latitude": 53.844688,
+      "longitude": 28.989293,
+      "area": 85.2,
+      "website": "https://berezinsky.by/",
+      "postal_address": null,
+      "description": "Березинский биосферный заповедник — заповедник, находящийся в северной части Белоруссии на расстоянии 120 километров от Минска в направлении Санкт-Петербурга. Расположен на границе Витебской и Минской областей.",
+      "region": null,
+      "district": null
+    },
+    "photos": {
+      "id": 1,
+      "reserve_id": 42,
+      "url": "https://minpriroda.gov.by/images/storage/photostorage/001290_4bcd74fdaf5d8196bc3bd7283a6ba99f.jpg"
+    },
+    "favorites": {
+      "id": 3,
+      "user_id": 1,
+      "reserve_id": 43
+    }
+  }

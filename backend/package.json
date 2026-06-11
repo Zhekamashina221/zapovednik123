@@ -1,0 +1,44 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "prestart": "node scripts/ensure-sqlite-native.js",
+    "start": "node index.js",
+    "rebuild:native": "npm rebuild better-sqlite3",
+    "postinstall": "node scripts/ensure-sqlite-native.js",
+    "migrate": "node migrate.js",
+    "db:promote-admin": "node scripts/promote-admin.js",
+    "db:seed-demo": "node scripts/seed-demo-users.js",
+    "db:sanitize": "node scripts/sanitize-db.js",
+    "db:backup": "node scripts/backup-reserves-db.js",
+    "photos:mirror": "node scripts/mirror-photos.js",
+    "photos:mirror:dry": "node scripts/mirror-photos.js --dry-run",
+    "photos:optimize": "node scripts/ensure-sqlite-native.js && node scripts/optimize-photos.js",
+    "photos:optimize:dry": "node scripts/ensure-sqlite-native.js && node scripts/optimize-photos.js --dry-run",
+    "region-scrape": "node src/sciprts/region_parser/scrape.js",
+    "region-scrape:fast": "node src/sciprts/region_parser/scrape.js --region-only",
+    "region-apply": "node src/sciprts/region_parser/apply_bindings.js",
+    "region-apply:dry": "node src/sciprts/region_parser/apply_bindings.js --dry-run"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "engines": {
+    "node": ">=22"
+  },
+  "dependencies": {
+    "bcrypt": "6.0.0",
+    "better-sqlite3": "12.10.0",
+    "cors": "2.8.5",
+    "dotenv": "17.2.3",
+    "express": "5.1.0",
+    "jsonwebtoken": "9.0.2",
+    "multer": "^2.1.1",
+    "nodemailer": "8.0.7",
+    "sharp": "^0.34.5"
+  }
+}

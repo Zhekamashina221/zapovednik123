@@ -1,0 +1,71 @@
+%%{init: {'theme': 'base', 'themeVariables': { 'fontSize': '14px'}}}%%
+flowchart LR
+    Guest((Гость))
+    User((Авторизованный<br/>пользователь))
+    Admin((Администратор))
+
+    subgraph SYS["Геоинформационный портал Zapovednik"]
+        direction TB
+
+        subgraph CAT["Просмотр каталога"]
+            UC_List["Просмотр списка ООПТ"]
+            UC_Map["Просмотр карты<br/>с кластеризацией"]
+            UC_Filter["Поиск и фильтрация"]
+            UC_Card["Просмотр карточки ООПТ"]
+            UC_Curated["Просмотр подборок<br/>маршрутов"]
+        end
+
+        subgraph RTE["Маршрутизация"]
+            UC_Route["Построение маршрута<br/>до объекта"]
+            UC_SaveRoute["Сохранение маршрута"]
+        end
+
+        subgraph ACC["Учётная запись"]
+            UC_Reg["Регистрация"]
+            UC_Login["Вход в систему"]
+            UC_Logout["Выход из системы"]
+        end
+
+        subgraph PER["Персональные данные"]
+            UC_Fav["Управление избранным"]
+            UC_Profile["Просмотр профиля"]
+            UC_Review["Оставление отзыва"]
+        end
+
+        subgraph ADM["Администрирование"]
+            UC_AdminRes["Управление ООПТ"]
+            UC_AdminUsers["Управление<br/>пользователями"]
+            UC_AdminRev["Модерация отзывов"]
+            UC_AdminRoutes["Управление подборками<br/>маршрутов"]
+            UC_AdminAudit["Аналитика и<br/>журнал аудита"]
+        end
+    end
+
+    Guest --> UC_List
+    Guest --> UC_Map
+    Guest --> UC_Filter
+    Guest --> UC_Card
+    Guest --> UC_Curated
+    Guest --> UC_Route
+    Guest --> UC_Reg
+    Guest --> UC_Login
+    User -.-> Guest
+    User --> UC_Fav
+    User --> UC_Profile
+    User --> UC_Review
+    User --> UC_SaveRoute
+    User --> UC_Logout
+    Admin --> UC_Login
+    Admin --> UC_AdminRes
+    Admin --> UC_AdminUsers
+    Admin --> UC_AdminRev
+    Admin --> UC_AdminRoutes
+    Admin --> UC_AdminAudit
+
+    UC_Card -. include .-> UC_Filter
+    UC_Route -. include .-> UC_Card
+    UC_Fav -. include .-> UC_Login
+    UC_Review -. include .-> UC_Login
+    UC_SaveRoute -. include .-> UC_Login
+    UC_SaveRoute -. extend .-> UC_Route
+    UC_AdminRes -. include .-> UC_Login

@@ -1,0 +1,120 @@
+@use 'variables' as *;
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: $font-base;
+  background: $background;
+  color: $color-text;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.container {
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 24px;
+  padding-left: max(24px, env(safe-area-inset-left));
+  padding-right: max(24px, env(safe-area-inset-right));
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding-left: max(16px, env(safe-area-inset-left));
+    padding-right: max(16px, env(safe-area-inset-right));
+  }
+
+  /* iOS не зумит страницу при фокусе на поле */
+  .app-input,
+  select.app-input {
+    font-size: 16px;
+  }
+}
+
+
+.card-surface {
+  background: $color-surface;
+  border: 1px solid #e6e7e9;
+  border-radius: $radius-lg;
+  box-shadow: $shadow;
+}
+
+.app-input {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid #d4d8dd;
+  border-radius: $radius;
+  background: $color-surface;
+  color: $color-text;
+  font-size: 1rem;
+  transition: $transition;
+}
+
+.app-input:focus {
+  outline: none;
+  border-color: $color-primary;
+  box-shadow: 0 0 0 3px rgba(46, 139, 87, 0.16);
+}
+
+.app-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 1px solid transparent;
+  border-radius: $radius;
+  padding: 10px 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: $transition;
+}
+
+.app-btn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.app-btn--primary {
+  background: $color-primary;
+  color: #fff;
+}
+
+.app-btn--primary:hover:not(:disabled) {
+  background: $color-secondary;
+}
+
+.app-btn--secondary {
+  background: $color-surface;
+  color: $color-primary;
+  border-color: rgba(46, 139, 87, 0.35);
+}
+
+.app-btn--secondary:hover:not(:disabled) {
+  background: $color-light;
+}
+
+.app-btn--danger {
+  background: $color-danger;
+  color: #fff;
+}
+
+.app-btn--danger:hover:not(:disabled) {
+  background: $color-danger-dark;
+}
+
+.app-btn--ghost {
+  background: transparent;
+  color: $color-text-light;
+  border-color: #d0d5dd;
+}
+
+.app-btn--ghost:hover:not(:disabled) {
+  background: #f9fafb;
+}
+
+.leaflet-bottom {
+  display: none !important;
+}

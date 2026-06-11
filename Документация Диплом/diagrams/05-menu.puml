@@ -1,0 +1,49 @@
+@startuml menu_zapovednik
+skinparam shadowing false
+skinparam defaultFontSize 12
+
+title Система меню — портал Zapovednik
+
+rectangle "Главное меню (шапка сайта)" as Header {
+  card "Карта (/)" as M1
+  card "Список (/list)" as M2
+  card "Маршруты (/marshruty)" as M3
+  card "Профиль (/profile)\n[только авторизован]" as M4
+  card "Админка (/admin)\n[только role=admin]" as M5
+  card "Войти (/login)\n[только гость]" as M6
+}
+
+rectangle "Меню профиля\n(/profile)" as Profile {
+  card "Основная информация" as P1
+  card "Избранное" as P2
+  card "Маршруты" as P3
+  card "Комментарии" as P4
+  card "Выйти" as P5
+}
+
+rectangle "Меню администратора\n(/admin)" as Admin {
+  card "Дашборд" as A1
+  card "Объекты" as A2
+  card "Пользователи" as A3
+  card "Модерация отзывов" as A4
+  card "Готовые маршруты" as A5
+  card "Аудит-логи" as A6
+}
+
+rectangle "Контекстные элементы" as Ctx {
+  card "Поиск в шапке" as C1
+  card "Фильтры каталога\n(страница списка)" as C2
+  card "Панель маршрута\n(карточка ООПТ)" as C3
+}
+
+Header --> Profile : авторизованный\nпользователь
+Header --> Admin : администратор
+M2 --> C2
+M1 ..> C1
+note right of Header
+  На экранах < 992 px —
+  бургер-меню с теми же
+  пунктами + поиск
+end note
+
+@enduml
